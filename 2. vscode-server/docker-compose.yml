@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  vscode:
+    build:
+      context: .
+      args:
+        USER: ${USER}
+        PASSWORD: ${PASSWORD}
+    container_name: vscode-container
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dev:/home/${USER}/vscode # ← 로컬의 ./dev 폴더가 코드 저장소 -> vscode-server/dev 폴더가 컨테이너의 /home/user/vscode에 연결된다.
+    environment:
+      - PASSWORD=${PASSWORD}
+    restart: always
