@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeLounge Content Editor</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h1 {
+            background-color: #222;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 2000px;
+            width: 90vw;
+            min-width: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .field {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+
+        .field label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .field input,
+        .content textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #333;
+            background-color: #f9f9f9;
+            padding-right: 16px;
+            box-sizing: border-box;
+        }
+
+        .field input:focus,
+        .content textarea:focus {
+            border-color: #007BFF;
+            background-color: white;
+            outline: none;
+            box-shadow: 0px 0px 4px rgba(0, 123, 255, 0.5);
+        }
+
+        .suggestions {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            width: 100%;
+            border: 1px solid #ddd;
+            background: white;
+            z-index: 1000;
+            max-height: 150px;
+            overflow-y: auto;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .suggestions div {
+            padding: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .suggestions div:hover {
+            background: #f4f4f9;
+        }
+
+        .content {
+            grid-column: span 2;
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .content-editor {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .markdown-preview-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .content h3 {
+            margin-bottom: 10px;
+            color: #222;
+        }
+
+        .content textarea {
+            resize: none;
+            min-height: 800px;
+            padding-right: 16px;
+            box-sizing: border-box;
+            flex: 1;
+        }
+
+        .markdown-preview {
+            flex: 1;
+            min-height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fafbfc;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 16px;
+            color: #222;
+        }
+
+        .markdown-preview h1,
+        .markdown-preview h2,
+        .markdown-preview h3,
+        .markdown-preview h4,
+        .markdown-preview h5,
+        .markdown-preview h6 {
+            background: none;
+            color: #222;
+            padding: 0;
+            margin: 0 0 10px 0;
+            text-align: left;
+        }
+
+        .markdown-preview h2 {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            grid-column: span 2;
+            width: 100%;
+        }
+
+        .button-group button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .button-group button.add {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .button-group button.add:hover {
+            background-color: #218838;
+        }
+
+        .button-group button.delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .button-group button.delete:hover {
+            background-color: #c82333;
+        }
+
+        .underline {
+            border-bottom: 2px solid #222;
+            padding-bottom: 0;
+            display: inline;
+        }
+
+        .markdown-preview pre {
+            background: #f4f6fa;
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin: 12px 0;
+            font-size: 15px;
+            overflow-x: auto;
+            border: 1px solid #e0e0e0;
+        }
+        .markdown-preview code {
+            background: #f4f6fa;
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>CodeLounge Content Editor</h1>
+
+    <div class="container">
+        <div class="field">
+            <label for="category">카테고리</label>
+            <input type="text" id="category" placeholder="Enter a category" oninput="showCategorySuggestions(this.value)" />
+            <div class="suggestions" id="category-suggestions"></div>
+        </div>
+
+        <div class="field">
+            <label for="title">Title</label>
+            <input type="text" id="title" placeholder="Select or add a title" oninput="showTitleSuggestions(this.value)" />
+            <div class="suggestions" id="title-suggestions"></div>
+        </div>
+
+        <div class="field">
+            <label for="author">만든사람</label>
+            <input type="text" id="author" placeholder="Author will appear here" />
+        </div>
+
+        <div class="field">
+            <label for="time">시간</label>
+            <input type="text" id="time" placeholder="YYYY-MM-DDTHH:MM:SSZ" />
+        </div>
+
+        <div class="content">
+            <div class="content-editor">
+                <h3>Content</h3>
+                <textarea id="content-box" rows="5" placeholder="Add content here" oninput="updatePreview()"></textarea>
+            </div>
+            <div class="markdown-preview-wrapper">
+                <h3>미리보기</h3>
+                <div class="markdown-preview" id="markdown-preview"></div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="add" onclick="addOrUpdateEntry()">Add/Update Entry</button>
+            <button class="delete" onclick="deleteEntry()">Delete Entry</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        marked.setOptions({ breaks: true });
+
+        // 서버에서 전달된 Firebase 데이터
+        const data = {{ data|tojson }};
+        let selectedCategory = "";
+        let selectedTitleKey = ""; // 기존 타이틀 키 (수정/삭제 시 사용)
+
+                // 한국 시간을 ISO 형식으로 반환
+        function getKoreanTime() {
+            const now = new Date();
+            const offset = 9 * 60 * 60 * 1000; // 한국 시간대 오프셋 (UTC+9)
+            const koreanTime = new Date(now.getTime() + offset);
+            return koreanTime.toISOString().slice(0, 19) + 'Z';
+        }
+
+        // 페이지 로드 시 한국 시간을 설정
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("time").value = getKoreanTime();
+            updatePreview();
+        });
+
+        // 카테고리 자동완성
+        function showCategorySuggestions(value) {
+            const suggestionsDiv = document.getElementById("category-suggestions");
+            suggestionsDiv.innerHTML = ""; // 이전 제안 삭제
+
+            if (!value.trim()) {
+                // 전체 카테고리 표시
+                Object.keys(data).forEach(category => {
+                    const div = document.createElement("div");
+                    div.textContent = category;
+                    div.onclick = () => {
+                        document.getElementById("category").value = category;
+                        selectedCategory = category;
+                        suggestionsDiv.innerHTML = "";
+                        showTitleSuggestions(""); // 제목 목록 표시
+                    };
+                    suggestionsDiv.appendChild(div);
+                });
+                suggestionsDiv.style.display = "block";
+                return;
+            }
+
+            const filteredCategories = Object.keys(data).filter(category =>
+                category.toLowerCase().includes(value.toLowerCase())
+            );
+
+            filteredCategories.forEach(category => {
+                const div = document.createElement("div");
+                div.textContent = category;
+                div.onclick = () => {
+                    document.getElementById("category").value = category;
+                    selectedCategory = category;
+                    suggestionsDiv.innerHTML = "";
+                    showTitleSuggestions(""); // 제목 목록 표시
+                };
+                suggestionsDiv.appendChild(div);
+            });
+
+            suggestionsDiv.style.display = filteredCategories.length ? "block" : "none";
+        }
+
+        // 제목 자동완성
+        function showTitleSuggestions(value) {
+            const suggestionsDiv = document.getElementById("title-suggestions");
+            suggestionsDiv.innerHTML = ""; // 이전 제안 삭제
+
+            if (!selectedCategory) {
+                suggestionsDiv.style.display = "none";
+                return;
+            }
+
+            const categoryData = data[selectedCategory];
+            if (!value.trim()) {
+                // 전체 제목 표시
+                Object.entries(categoryData).forEach(([key, item]) => {
+                    const div = document.createElement("div");
+                    div.textContent = item.title;
+                    div.onclick = () => {
+                        document.getElementById("title").value = item.title;
+                        document.getElementById("author").value = item.author_id;
+                        document.getElementById("time").value = item.created_at;
+                        document.getElementById("content-box").value = item.content;
+                        selectedTitleKey = key;
+                        suggestionsDiv.innerHTML = "";
+                        updatePreview();
+                    };
+                    suggestionsDiv.appendChild(div);
+                });
+                suggestionsDiv.style.display = "block";
+                return;
+            }
+
+            const filteredTitles = Object.entries(categoryData).filter(([key, item]) =>
+                item.title.toLowerCase().includes(value.toLowerCase())
+            );
+
+            filteredTitles.forEach(([key, item]) => {
+                const div = document.createElement("div");
+                div.textContent = item.title;
+                div.onclick = () => {
+                    document.getElementById("title").value = item.title;
+                    document.getElementById("author").value = item.author_id;
+                    document.getElementById("time").value = item.created_at;
+                    document.getElementById("content-box").value = item.content;
+                    selectedTitleKey = key;
+                    suggestionsDiv.innerHTML = "";
+                    updatePreview();
+                };
+                suggestionsDiv.appendChild(div);
+            });
+
+            suggestionsDiv.style.display = filteredTitles.length ? "block" : "none";
+        }
+
+        function addOrUpdateEntry() {
+            const category = document.getElementById("category").value.trim();
+            const title = document.getElementById("title").value.trim();
+            const author = document.getElementById("author").value.trim();
+            const time = document.getElementById("time").value.trim();
+            const content = document.getElementById("content-box").value.trim();
+
+            if (!category || !title || !author || !time || !content) {
+                alert("All fields are required to add or update an entry.");
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            const endpoint = selectedTitleKey ? "/update-entry" : "/add-entry";
+            xhr.open("POST", endpoint, true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    alert("Entry saved successfully!");
+                    location.reload();
+                } else {
+                    alert("Failed to save entry.");
+                }
+            };
+            xhr.send(
+                JSON.stringify({
+                    category,
+                    title,
+                    author,
+                    time,
+                    content,
+                    key: selectedTitleKey,
+                })
+            );
+        }
+
+        // 기존 항목 삭제
+        function deleteEntry() {
+            if (!selectedCategory || !selectedTitleKey) {
+                alert("Please select a title to delete.");
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/delete-entry", true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    alert("Entry deleted successfully!");
+                    location.reload();
+                } else {
+                    alert("Failed to delete entry.");
+                }
+            };
+            xhr.send(
+                JSON.stringify({
+                    category: selectedCategory,
+                    key: selectedTitleKey,
+                })
+            );
+        }
+
+        function updatePreview() {
+            let content = document.getElementById("content-box").value;
+            // ##텍스트## 패턴을 <span class="underline">텍스트</span>로 변환
+            content = content.replace(/##([^#\n]+)##/g, '<span class="underline">$1</span>');
+            document.getElementById("markdown-preview").innerHTML = marked.parse(content);
+        }
+    </script>
+</body>
+</html>
