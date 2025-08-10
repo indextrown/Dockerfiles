@@ -21,8 +21,15 @@ ARG PASSWORD
 ARG UID=1000
 ARG GID=1000
 
-# ----- 사용자 생성 (root로) -----
-RUN useradd -m ${USER} && echo "${USER}:${PASSWORD}" | chpasswd && adduser ${USER} sudo
+# ----- 기존 UID가 있으면 삭제 후 새로 생성 -----
+RUN if id -u ${UID} >/dev/null 2>&1; then \
+        OLD_USER=$(getent passwd ${UID} | cut -d: -f1) && \
+        userdel -r "$OLD_USER"; \
+    fi && \
+    groupadd -g ${GID} ${USER} && \
+    useradd -m -u ${UID} -g ${GID} ${USER} && \
+    echo "${USER}:${PASSWORD}" | chpasswd && \
+    adduser ${USER} sudo
 
 # ----- code-server 설치 (root) -----
 RUN curl -fsSL https://code-server.dev/install.sh | sh
@@ -31,7 +38,28 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh
 ENV WORKINGDIR="/home/${USER}/vscode"
 RUN mkdir -p ${WORKINGDIR} && chown -R ${UID}:${GID} /home/${USER}
 
-# ----- VSCode 확장 설치 (root) -----
+# ===============================
+# Swiftly 설치 (사용자 권한)
+# ===============================
+USER ${USER}
+WORKDIR /home/${USER}
+
+RUN mkdir -p /home/${USER}/.local/share && \
+    curl -O "https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz" && \
+    tar zxf "swiftly-$(uname -m).tar.gz" && \
+    chmod +x swiftly && \
+    ./swiftly init --quiet-shell-followup --assume-yes && \
+    /home/${USER}/.local/share/swiftly/bin/swiftly install 6.1.0 --assume-yes --verify && \
+    chmod -R +x /home/${USER}/.local/share/swiftly
+
+# 환경변수 등록
+RUN echo 'export SWIFTLY_HOME=/home/'${USER}'/.local/share/swiftly' >> /home/${USER}/.bashrc && \
+    echo 'export PATH="$SWIFTLY_HOME/bin:$PATH"' >> /home/${USER}/.bashrc
+
+# ===============================
+# VSCode 확장 설치 (root)
+# ===============================
+USER root
 RUN code-server --install-extension ms-python.python && \
     code-server --install-extension ms-azuretools.vscode-docker && \
     code-server --install-extension formulahendry.code-runner
@@ -40,7 +68,8 @@ RUN code-server --install-extension ms-python.python && \
 ENV PASSWORD=${PASSWORD}
 ENV USER=${USER}
 
-# ----- 실행 시 사용자 전환은 docker-compose에서 -----
+# ----- 실행 시 사용자 전환 -----
+USER ${USER}
 WORKDIR ${WORKINGDIR}
 
 # ----- 포트 오픈 -----
@@ -48,8 +77,4 @@ EXPOSE 5002
 
 # ----- code-server 실행 -----
 CMD ["code-server", "--bind-addr", "0.0.0.0:5002", "--auth", "password", "."]
-
-
-# 권한 문제 발생시 아래 커맨드 입력
-# sudo chown -R $(id -u):$(id -g) ./dev
 

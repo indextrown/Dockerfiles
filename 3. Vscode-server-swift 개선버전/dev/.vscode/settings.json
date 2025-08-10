@@ -1,7 +1,8 @@
 {
-    "code-runner.executorMap": {
-        "python": "python3 -u",
-    },
-    "code-runner.showExecutionMessage": false,
-    "code-runner.clearPreviousOutput": true
+  "code-runner.executorMap": {
+    "python": "python3 -u",
+    "swift": "/home/index/.local/share/swiftly/bin/swift"
+  },
+  "code-runner.showExecutionMessage": false,
+  "code-runner.clearPreviousOutput": true
 }
