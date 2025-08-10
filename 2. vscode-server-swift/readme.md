@@ -16,6 +16,21 @@ Swift를 제외한 Python, Java, Docker 등 일반적인 개발에 최적화된 
 
 ---
 
+## DockerCompose 실행
+```bash
+# 빌드 & 실행
+docker-compose up -d
+
+# 로그 확인
+docker-compose logs -f
+
+# 컨테이너 중지 및 삭제
+docker-compose down
+
+# 볼륨·네트워크·이미지까지 삭제
+docker-compose down --rmi all --volumes --remove-orphans
+```
+
 ## 📁 Dockerfile 요약
 
 ```dockerfile

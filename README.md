@@ -12,6 +12,78 @@ tar xzf vscode-server.tar.gz
 cd vscode-server/
 ```
 
+# Dockerfile vs docker-compose 실행 & 삭제 방법 정리
+
+## 1. Dockerfile
+
+### 📌 빌드
+
+```bash
+# Dockerfile이 있는 경로에서 실행
+docker build -t 이미지이름:태그 .
+# 예: docker build -t myapp:latest .
+```
+
+### 📌 실행
+
+```bash
+# 컨테이너 실행
+docker run -d --name 컨테이너이름 -p 호스트포트:컨테이너포트 이미지이름:태그
+# 예: docker run -d --name myapp-container -p 8080:80 myapp:latest
+```
+
+### 📌 삭제
+
+```bash
+# 컨테이너 중지 및 삭제
+docker stop 컨테이너이름
+docker rm 컨테이너이름
+
+# 이미지 삭제
+docker rmi 이미지이름:태그
+```
+
+---
+
+## 2. docker-compose
+
+### 📌 실행
+
+```bash
+# docker-compose.yml이 있는 경로에서 실행
+docker-compose up -d
+# (-d 옵션은 백그라운드 실행)
+```
+
+### 📌 종료
+
+```bash
+docker-compose down
+```
+
+### 📌 삭제 (이미지까지 삭제)
+
+```bash
+docker-compose down --rmi all
+```
+
+### 📌 볼륨까지 삭제
+
+```bash
+docker-compose down --volumes
+```
+
+---
+
+## 📊 차이 정리
+
+| 구분      | Dockerfile                    | docker-compose               |
+| --------- | ----------------------------- | ---------------------------- |
+| 역할      | 단일 이미지 빌드 정의         | 여러 컨테이너 서비스 관리    |
+| 실행      | `docker build` + `docker run` | `docker-compose up`          |
+| 사용 편의 | 단일 컨테이너 중심            | 여러 서비스 한번에 실행·종료 |
+| 설정 파일 | Dockerfile                    | docker-compose.yml           |
+
 # Dockerfile vs docker-compose 차이
 
 ## 1. Dockerfile
