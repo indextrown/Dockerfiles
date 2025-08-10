@@ -51,7 +51,8 @@ docker rmi 이미지이름:태그
 
 ```bash
 # docker-compose.yml이 있는 경로에서 실행
-docker-compose up -d
+# docker-compose up -d
+docker compose up -d
 # (-d 옵션은 백그라운드 실행)
 ```
 
