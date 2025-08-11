@@ -1,0 +1,27 @@
+// {
+//   "code-runner.executorMap": {
+//     "python": "python3 -u",
+//     "swift": "/home/index/.local/share/swiftly/bin/swift",
+//     "kotlin": "bash -lc 'source \"$HOME/.sdkman/bin/sdkman-init.sh\" && kotlinc \"$fileName\" -include-runtime -d \"$fileNameWithoutExt.jar\" && java -jar \"$fileNameWithoutExt.jar\"'"
+//   },
+//   "code-runner.runInTerminal": true,
+//   "code-runner.showExecutionMessage": false,
+//   "code-runner.clearPreviousOutput": true
+// }
+
+{
+  "code-runner.executorMap": {
+    "python": "python3 -u",
+    "swift": "/home/index/.local/share/swiftly/bin/swift",
+    "kotlin": "bash -lc 'source \"$HOME/.sdkman/bin/sdkman-init.sh\" && kotlinc \"$fileName\" -include-runtime -d \"$fileNameWithoutExt.jar\" && java -jar \"$fileNameWithoutExt.jar\"'"
+  },
+  "code-runner.runInTerminal": true,
+  "code-runner.showExecutionMessage": false,
+  "code-runner.clearPreviousOutput": true,
+  // "terminal.integrated.defaultProfile.linux": "bash",
+  // "terminal.integrated.profiles.linux": {
+  //   "bash": {
+  //     "path": "/bin/bash"
+  //   }
+  // }
+}
